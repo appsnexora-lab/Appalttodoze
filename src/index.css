@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-lilas-primary: #A58ADB;
+    --color-lilas-secondary: #C4B1F0;
+    --color-lilas-light: #F0EAFE;
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #FAF9FD;
+    --color-card: #FFFFFF;
+    --color-border: #EAE5F4;
+    --color-text-primary: #29243A;
+    --color-text-secondary: #827A96;
+    --color-green-soft: #B9DCCB;
+    --color-selection: #E8DFFC;
+  }
+
+  body {
+    background-color: #FAF9FD;
+    color: #29243A;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    margin: 0;
+    padding: 0;
+  }
+
+  ::selection {
+    background-color: #E8DFFC;
+    color: #29243A;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Lora', Georgia, serif;
+  }
+}
+
+/* Ice Cream Card Styles */
+.ice-card {
+  background: #FFFFFF;
+  border: 1px solid #EAE5F4;
+  box-shadow: 0 2px 12px -2px rgba(165, 138, 219, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.ice-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ice-card-hover:hover {
+  border-color: #C4B1F0;
+  box-shadow: 0 4px 20px -2px rgba(165, 138, 219, 0.12), 0 2px 6px rgba(0, 0, 0, 0.03);
+  transform: translateY(-1px);
+}
+
+.ice-card-highlight {
+  background: linear-gradient(135deg, #FAF8FE 0%, #F5F0FF 50%, #EFE8FE 100%);
+  border: 1px solid #DFD5F5;
+  box-shadow: 0 4px 20px -2px rgba(165, 138, 219, 0.09);
+}
+
+/* Primary Button Styling */
+.btn-lilas {
+  background-color: #A58ADB;
+  color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.btn-lilas:hover {
+  background-color: #9376CD;
+  box-shadow: 0 4px 14px rgba(165, 138, 219, 0.35);
+}
+
+.btn-lilas:active {
+  transform: scale(0.98);
+}
+
+/* Altto 4-column library grid */
+.book-grid-4 {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 0.6rem !important;
+  width: 100% !important;
+  align-items: stretch !important;
+}
+
+@media (min-width: 640px) {
+  .book-grid-4 {
+    gap: 0.85rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .book-grid-4 {
+    gap: 1.1rem !important;
+  }
+}
+
+/* Elegant Ice Cream Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(165, 138, 219, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(165, 138, 219, 0.5);
+}

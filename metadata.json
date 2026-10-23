@@ -1,0 +1,6 @@
+{
+  "name": "ALTTO — Leitura Cristã, Bíblia e Devocional",
+  "description": "ALTTO é uma plataforma cristã completa para leitura da Bíblia Sagrada, devocionais diários com planos de leitura e gerenciamento de biblioteca de livros digitais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,136 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with reading settings and daily streak",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 200 },
+        "avatarUrl": { "type": "string", "maxLength": 2048 },
+        "avatarPreset": { "type": "string", "maxLength": 50 },
+        "favoriteVerse": { "type": "string", "maxLength": 300 },
+        "bio": { "type": "string", "maxLength": 500 },
+        "dailyGoalChapters": { "type": "number" },
+        "streakDays": { "type": "number" },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name"]
+    },
+    "BookMetadata": {
+      "title": "BookMetadata",
+      "description": "Book metadata, storage references, sync status, and reading progress",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 300 },
+        "author": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 4000 },
+        "format": { "type": "string", "maxLength": 10 },
+        "storagePath": { "type": "string", "maxLength": 1024 },
+        "fileSize": { "type": "number" },
+        "fileHash": { "type": "string", "maxLength": 128 },
+        "coverUrl": { "type": "string", "maxLength": 300000 },
+        "coverStoragePath": { "type": "string", "maxLength": 1024 },
+        "coverType": { "type": "string", "maxLength": 50 },
+        "coverSource": { "type": "string", "maxLength": 50 },
+        "coverGeneratedAt": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "maxLength": 20 },
+        "isFavorite": { "type": "boolean" },
+        "currentPage": { "type": "number" },
+        "totalPages": { "type": "number" },
+        "currentChapterIndex": { "type": "number" },
+        "totalChapters": { "type": "number" },
+        "progressPercent": { "type": "number" },
+        "syncStatus": { "type": "string", "maxLength": 20 },
+        "addedAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 },
+        "lastReadAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "ownerId", "title", "author", "format", "addedAt"]
+    },
+    "ReadingProgress": {
+      "title": "ReadingProgress",
+      "description": "Synchronized reading position across devices",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "contentId": { "type": "string", "maxLength": 128 },
+        "contentType": { "type": "string", "maxLength": 20 },
+        "currentPage": { "type": "number" },
+        "currentChapter": { "type": "string", "maxLength": 128 },
+        "percentage": { "type": "number" },
+        "scrollOffset": { "type": "number" },
+        "lastReadAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "contentId", "contentType", "percentage", "lastReadAt"]
+    },
+    "ReadingGoal": {
+      "title": "ReadingGoal",
+      "description": "User reading goal for a book or chapter target",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "bookId": { "type": "string", "maxLength": 128 },
+        "targetDays": { "type": "number" },
+        "targetDate": { "type": "string", "maxLength": 32 },
+        "dailyTargetPages": { "type": "number" },
+        "dailyTargetChapters": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "bookId", "targetDays", "targetDate", "createdAt"]
+    },
+    "ReadingList": {
+      "title": "ReadingList",
+      "description": "Custom reading list / collection",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "userId", "name", "createdAt"]
+    },
+    "TestConnection": {
+      "title": "TestConnection",
+      "description": "Health check document for verifying Firestore client connectivity",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "maxLength": 30 }
+      },
+      "required": ["status"]
+    }
+  },
+  "firestore": {
+    "/test/{testId}": {
+      "schema": "TestConnection",
+      "description": "Health check collection for validating Firestore client connectivity."
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile and personal preferences."
+    },
+    "/users/{userId}/books/{bookId}": {
+      "schema": "BookMetadata",
+      "description": "User book library metadata and sync status."
+    },
+    "/users/{userId}/reading_progress/{contentId}": {
+      "schema": "ReadingProgress",
+      "description": "User reading progress synchronized across devices."
+    },
+    "/users/{userId}/reading_goals/{goalId}": {
+      "schema": "ReadingGoal",
+      "description": "User reading goals and target schedules."
+    },
+    "/users/{userId}/reading_lists/{listId}": {
+      "schema": "ReadingList",
+      "description": "User custom reading lists and collections."
+    }
+  }
+}

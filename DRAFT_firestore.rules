@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Test Connection Endpoint for SDK connectivity verification
+    match /test/{testId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Validation Helpers
+    function isValidUserProfile(data, userId) {
+      return data.id is string && data.id == userId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 2048))
+        && (!('bio' in data) || (data.bio is string && data.bio.size() <= 500))
+        && (!('streakDays' in data) || data.streakDays is number)
+        && (!('dailyGoalChapters' in data) || data.dailyGoalChapters is number)
+        && data.keys().hasAll(['id', 'name'])
+        && data.keys().hasOnly(['id', 'name', 'email', 'avatarUrl', 'avatarPreset', 'favoriteVerse', 'bio', 'dailyGoalChapters', 'streakDays', 'updatedAt']);
+    }
+
+    function isValidBook(data, userId, bookId) {
+      return data.id is string && data.id == bookId
+        && data.ownerId is string && data.ownerId == userId
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 300
+        && data.author is string && data.author.size() <= 200
+        && data.format is string && data.format.size() <= 10
+        && (!('description' in data) || (data.description is string && data.description.size() <= 4000))
+        && (!('storagePath' in data) || (data.storagePath is string && data.storagePath.size() <= 1024))
+        && (!('fileSize' in data) || data.fileSize is number)
+        && (!('fileHash' in data) || (data.fileHash is string && data.fileHash.size() <= 128))
+        && (!('coverUrl' in data) || (data.coverUrl is string && data.coverUrl.size() <= 300000))
+        && (!('coverStoragePath' in data) || (data.coverStoragePath is string && data.coverStoragePath.size() <= 1024))
+        && (!('coverType' in data) || (data.coverType is string && data.coverType.size() <= 50))
+        && (!('coverSource' in data) || (data.coverSource is string && data.coverSource.size() <= 50))
+        && (!('status' in data) || (data.status is string && data.status.size() <= 20))
+        && (!('isFavorite' in data) || data.isFavorite is bool)
+        && (!('currentPage' in data) || data.currentPage is number)
+        && (!('totalPages' in data) || data.totalPages is number)
+        && (!('currentChapterIndex' in data) || data.currentChapterIndex is number)
+        && (!('totalChapters' in data) || data.totalChapters is number)
+        && (!('progressPercent' in data) || data.progressPercent is number)
+        && (!('syncStatus' in data) || (data.syncStatus is string && data.syncStatus.size() <= 20))
+        && data.keys().hasAll(['id', 'ownerId', 'title', 'author', 'format', 'addedAt'])
+        && data.keys().hasOnly([
+          'id', 'ownerId', 'title', 'author', 'description', 'format',
+          'storagePath', 'fileSize', 'fileHash', 'coverUrl', 'coverStoragePath',
+          'coverType', 'coverSource', 'coverGeneratedAt', 'status', 'isFavorite',
+          'currentPage', 'totalPages', 'currentChapterIndex', 'totalChapters',
+          'progressPercent', 'syncStatus', 'addedAt', 'updatedAt', 'lastReadAt'
+        ]);
+    }
+
+    function isValidReadingProgress(data, userId) {
+      return data.userId is string && data.userId == userId
+        && data.contentId is string && data.contentId.size() > 0 && data.contentId.size() <= 128
+        && data.contentType is string && data.contentType.size() <= 20
+        && data.percentage is number && data.percentage >= 0 && data.percentage <= 100
+        && (!('currentPage' in data) || data.currentPage is number)
+        && (!('scrollOffset' in data) || data.scrollOffset is number)
+        && data.keys().hasAll(['id', 'userId', 'contentId', 'contentType', 'percentage', 'lastReadAt'])
+        && data.keys().hasOnly(['id', 'userId', 'contentId', 'contentType', 'currentPage', 'currentChapter', 'percentage', 'scrollOffset', 'lastReadAt']);
+    }
+
+    function isValidReadingGoal(data, userId) {
+      return data.userId is string && data.userId == userId
+        && data.bookId is string && data.bookId.size() > 0 && data.bookId.size() <= 128
+        && data.targetDays is number && data.targetDays > 0
+        && data.targetDate is string && data.targetDate.size() <= 32
+        && data.keys().hasAll(['id', 'userId', 'bookId', 'targetDays', 'targetDate', 'createdAt'])
+        && data.keys().hasOnly(['id', 'userId', 'bookId', 'targetDays', 'targetDate', 'dailyTargetPages', 'dailyTargetChapters', 'createdAt']);
+    }
+
+    function isValidReadingList(data, userId) {
+      return data.userId is string && data.userId == userId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 150
+        && (!('description' in data) || (data.description is string && data.description.size() <= 1000))
+        && data.keys().hasAll(['id', 'userId', 'name', 'createdAt'])
+        && data.keys().hasOnly(['id', 'userId', 'name', 'description', 'createdAt']);
+    }
+
+    // User Profile
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false; // User profiles cannot be listed
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming(), userId);
+      allow delete: if false;
+
+      // Books subcollection
+      match /books/{bookId} {
+        allow get: if isOwner(userId) && isValidId(bookId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(bookId) && isValidBook(incoming(), userId, bookId);
+        allow update: if isOwner(userId) && isValidId(bookId)
+          && isValidBook(incoming(), userId, bookId)
+          && incoming().id == existing().id
+          && incoming().ownerId == existing().ownerId
+          && incoming().addedAt == existing().addedAt;
+        allow delete: if isOwner(userId) && isValidId(bookId);
+      }
+
+      // Reading Progress subcollection
+      match /reading_progress/{contentId} {
+        allow get: if isOwner(userId) && isValidId(contentId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(contentId) && isValidReadingProgress(incoming(), userId);
+        allow delete: if isOwner(userId) && isValidId(contentId);
+      }
+
+      // Reading Goals subcollection
+      match /reading_goals/{goalId} {
+        allow get: if isOwner(userId) && isValidId(goalId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(goalId) && isValidReadingGoal(incoming(), userId);
+        allow delete: if isOwner(userId) && isValidId(goalId);
+      }
+
+      // Reading Lists subcollection
+      match /reading_lists/{listId} {
+        allow get: if isOwner(userId) && isValidId(listId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(listId) && isValidReadingList(incoming(), userId);
+        allow delete: if isOwner(userId) && isValidId(listId);
+      }
+    }
+  }
+}
